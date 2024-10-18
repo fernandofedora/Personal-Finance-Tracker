@@ -31,13 +31,45 @@
             <button type="submit" class="btn btn-primary">Add Transaction</button>
         </form>
 
+        <!-- Componente para mostrar los totales -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Income</h5>
+                        <p id="totalIncome" class="card-text">$0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Expense</h5>
+                        <p id="totalExpense" class="card-text">$0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Componente para mostrar el balance -->
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Balance</h5>
+                        <p id="balance" class="card-text">$0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="mb-3">
             <button class="btn btn-secondary" onclick="loadChartData('day')">Day</button>
             <button class="btn btn-secondary" onclick="loadChartData('week')">Week</button>
             <button class="btn btn-secondary" onclick="loadChartData('month')">Month</button>
         </div>
 
-      
+        <canvas id="financeChart" width="400" height="200"></canvas>
 
         <!-- Tabla para mostrar las transacciones -->
         <table class="table mt-4" id="transactionTable">
@@ -54,8 +86,6 @@
                 <!-- Las transacciones se cargarán dinámicamente aquí -->
             </tbody>
         </table>
-        
-        <canvas id="financeChart" width="400" height="200"></canvas>
     </div>
 
     <script src="main.js"></script>

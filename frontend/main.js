@@ -52,8 +52,9 @@ document.getElementById('transactionForm').addEventListener('submit', function (
     const transaction = { title, amount, type, date };  // Incluir el título
     saveTransaction(transaction);
 
-    // Actualizar el gráfico y la tabla después de agregar una nueva transacción
+    // Actualizar el gráfico, tabla y los componentes de totales/balance después de agregar una nueva transacción
     renderTransactionTable();
+    updateTotalsAndBalance();
     updateChartData('month'); // Aseguramos que la gráfica se actualice, en lugar de recrearla
 
     // Resetear el formulario
@@ -80,6 +81,26 @@ function filterTransactionsByPeriod(period) {
 
         return true; // Si no se especifica un período, devuelve todas las transacciones
     });
+}
+
+// Función para calcular y mostrar los totales de ingresos, egresos y el balance general
+function updateTotalsAndBalance() {
+    const transactions = getTransactions();
+
+    const totalIncome = transactions
+        .filter(t => t.type === 'income')
+        .reduce((acc, t) => acc + t.amount, 0);
+
+    const totalExpense = transactions
+        .filter(t => t.type === 'expense')
+        .reduce((acc, t) => acc + t.amount, 0);
+
+    const balance = totalIncome - totalExpense;
+
+    // Actualizar los valores en el DOM
+    document.getElementById('totalIncome').textContent = `$${totalIncome.toFixed(2)}`;
+    document.getElementById('totalExpense').textContent = `$${totalExpense.toFixed(2)}`;
+    document.getElementById('balance').textContent = `$${balance.toFixed(2)}`;
 }
 
 // Función para cargar y actualizar los datos del gráfico según el período seleccionado
@@ -123,8 +144,9 @@ function updateChartData(period) {
     }
 }
 
-// Cargar los datos iniciales del mes y la tabla de transacciones al cargar la página
+// Cargar los datos iniciales del mes, tabla de transacciones y totales/balance al cargar la página
 window.onload = function () {
     updateChartData('month');
     renderTransactionTable();
+    updateTotalsAndBalance(); // Calcular totales y balance al cargar la página
 };
