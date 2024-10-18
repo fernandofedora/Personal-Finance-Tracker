@@ -64,9 +64,10 @@
         </div>
 
         <div class="mb-3">
-            <button class="btn btn-secondary" onclick="loadChartData('day')">Day</button>
-            <button class="btn btn-secondary" onclick="loadChartData('week')">Week</button>
-            <button class="btn btn-secondary" onclick="loadChartData('month')">Month</button>
+            <!-- Actualizamos las llamadas a la función correcta -->
+            <button class="btn btn-secondary" onclick="updateChartData('day')">Day</button>
+            <button class="btn btn-secondary" onclick="updateChartData('week')">Week</button>
+            <button class="btn btn-secondary" onclick="updateChartData('month')">Month</button>
         </div>
 
         <canvas id="financeChart" width="400" height="200"></canvas>
@@ -80,6 +81,7 @@
                     <th>Type</th>
                     <th>Date</th>
                     <th>Time</th>
+                    <th>Actions</th> <!-- Nueva columna para los botones -->
                 </tr>
             </thead>
             <tbody>

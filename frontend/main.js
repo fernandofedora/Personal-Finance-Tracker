@@ -1,19 +1,37 @@
-// Función para obtener transacciones desde Local Storage
+// Función para obtener las transacciones desde Local Storage
 function getTransactions() {
     return JSON.parse(localStorage.getItem('transactions')) || [];
 }
 
 // Función para guardar transacciones en Local Storage
-function saveTransaction(transaction) {
-    const transactions = getTransactions();
-    transactions.push(transaction);
+function saveTransactions(transactions) {
     localStorage.setItem('transactions', JSON.stringify(transactions));
 }
 
-// Variable global para la instancia del gráfico
-let chart;
+// Función para agregar una nueva transacción
+function saveTransaction(transaction) {
+    const transactions = getTransactions();
+    transactions.push(transaction);
+    saveTransactions(transactions);
+}
 
-// Función para renderizar las transacciones en la tabla
+// Función para eliminar una transacción
+function deleteTransaction(index) {
+    const transactions = getTransactions();
+    transactions.splice(index, 1); // Elimina la transacción en el índice dado
+    saveTransactions(transactions);
+    updateUI();
+}
+
+// Función para actualizar una transacción
+function updateTransaction(index, updatedTransaction) {
+    const transactions = getTransactions();
+    transactions[index] = updatedTransaction; // Actualiza la transacción en el índice dado
+    saveTransactions(transactions);
+    updateUI();
+}
+
+// Función para renderizar la tabla de transacciones con botones de acción
 function renderTransactionTable() {
     const transactions = getTransactions();
     const tableBody = document.getElementById('transactionTable').getElementsByTagName('tbody')[0];
@@ -21,7 +39,7 @@ function renderTransactionTable() {
     // Limpiar la tabla antes de agregar nuevas filas
     tableBody.innerHTML = '';
 
-    transactions.forEach(transaction => {
+    transactions.forEach((transaction, index) => {
         const row = tableBody.insertRow();
 
         const titleCell = row.insertCell(0);
@@ -29,40 +47,92 @@ function renderTransactionTable() {
         const typeCell = row.insertCell(2);
         const dateCell = row.insertCell(3);
         const timeCell = row.insertCell(4);
+        const actionCell = row.insertCell(5); // Celda para los botones de acción
 
         const transactionDate = new Date(transaction.date);
 
-        titleCell.textContent = transaction.title;  // Mostrar el título
+        titleCell.textContent = transaction.title;
         amountCell.textContent = transaction.amount;
-        typeCell.textContent = transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1); // Capitaliza 'income' y 'expense'
-        dateCell.textContent = transactionDate.toLocaleDateString(); // Fecha en formato legible
-        timeCell.textContent = transactionDate.toLocaleTimeString(); // Hora en formato legible
+        typeCell.textContent = transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1);
+        dateCell.textContent = transactionDate.toLocaleDateString();
+        timeCell.textContent = transactionDate.toLocaleTimeString();
+
+        // Crear botón de eliminar
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.classList.add('btn', 'btn-danger', 'btn-sm', 'me-2');
+        deleteButton.onclick = function() {
+            deleteTransaction(index);
+        };
+
+        // Crear botón de actualizar
+        const updateButton = document.createElement('button');
+        updateButton.textContent = 'Update';
+        updateButton.classList.add('btn', 'btn-warning', 'btn-sm');
+        updateButton.onclick = function() {
+            populateUpdateForm(transaction, index);
+        };
+
+        // Agregar los botones a la celda de acciones
+        actionCell.appendChild(deleteButton);
+        actionCell.appendChild(updateButton);
     });
 }
 
-// Función para agregar una nueva transacción
-document.getElementById('transactionForm').addEventListener('submit', function (e) {
+// Función para rellenar el formulario con datos existentes para su actualización
+function populateUpdateForm(transaction, index) {
+    document.getElementById('title').value = transaction.title;
+    document.getElementById('amount').value = transaction.amount;
+    document.getElementById('type').value = transaction.type;
+
+    // Cambiamos el comportamiento del formulario para que actualice en lugar de crear una nueva transacción
+    document.getElementById('transactionForm').onsubmit = function(e) {
+        e.preventDefault();
+        
+        const updatedTitle = document.getElementById('title').value;
+        const updatedAmount = parseFloat(document.getElementById('amount').value);
+        const updatedType = document.getElementById('type').value;
+        const updatedDate = new Date().toISOString(); // Fecha y hora actualizadas
+
+        const updatedTransaction = { title: updatedTitle, amount: updatedAmount, type: updatedType, date: updatedDate };
+        updateTransaction(index, updatedTransaction);
+
+        // Resetear el formulario y restaurar el comportamiento para agregar nuevas transacciones
+        document.getElementById('transactionForm').reset();
+        document.getElementById('transactionForm').onsubmit = handleFormSubmit;
+    };
+}
+
+// Función para manejar el envío del formulario (agregar transacción)
+function handleFormSubmit(e) {
     e.preventDefault();
 
-    const title = document.getElementById('title').value;  // Obtener el título
+    const title = document.getElementById('title').value;
     const amount = parseFloat(document.getElementById('amount').value);
     const type = document.getElementById('type').value;
     const date = new Date().toISOString(); // Almacenar la fecha y hora en formato ISO
 
-    const transaction = { title, amount, type, date };  // Incluir el título
+    const transaction = { title, amount, type, date };
     saveTransaction(transaction);
 
-    // Actualizar el gráfico, tabla y los componentes de totales/balance después de agregar una nueva transacción
-    renderTransactionTable();
-    updateTotalsAndBalance();
-    updateChartData('month'); // Aseguramos que la gráfica se actualice, en lugar de recrearla
-
-    // Resetear el formulario
+    // Actualizar la UI y resetear el formulario
+    updateUI();
     document.getElementById('transactionForm').reset();
     document.getElementById('type').value = 'income'; // Restablecer el tipo a 'income'
-});
+}
 
-// Función para filtrar transacciones por día, semana o mes
+// Función para actualizar la UI (tabla, gráfico y totales/balance)
+function updateUI() {
+    renderTransactionTable();
+    updateTotalsAndBalance();
+    // Actualizar el gráfico con el período seleccionado actualmente
+    updateChartData(currentPeriod);
+}
+
+// Variable para almacenar el período seleccionado actualmente
+let currentPeriod = 'month';
+
+// Función para filtrar transacciones por período
 function filterTransactionsByPeriod(period) {
     const transactions = getTransactions();
     const now = new Date();
@@ -73,17 +143,17 @@ function filterTransactionsByPeriod(period) {
         if (period === 'day') {
             return transactionDate.toDateString() === now.toDateString();
         } else if (period === 'week') {
-            const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-            return transactionDate >= startOfWeek && transactionDate <= new Date();
+            const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+            return transactionDate >= startOfWeek && transactionDate <= now;
         } else if (period === 'month') {
-            return transactionDate.getMonth() === new Date().getMonth() && transactionDate.getFullYear() === new Date().getFullYear();
+            return transactionDate.getMonth() === now.getMonth() && transactionDate.getFullYear() === now.getFullYear();
         }
 
         return true; // Si no se especifica un período, devuelve todas las transacciones
     });
 }
 
-// Función para calcular y mostrar los totales de ingresos, egresos y el balance general
+// Función para actualizar los totales y balance
 function updateTotalsAndBalance() {
     const transactions = getTransactions();
 
@@ -97,14 +167,17 @@ function updateTotalsAndBalance() {
 
     const balance = totalIncome - totalExpense;
 
-    // Actualizar los valores en el DOM
     document.getElementById('totalIncome').textContent = `$${totalIncome.toFixed(2)}`;
     document.getElementById('totalExpense').textContent = `$${totalExpense.toFixed(2)}`;
     document.getElementById('balance').textContent = `$${balance.toFixed(2)}`;
 }
 
-// Función para cargar y actualizar los datos del gráfico según el período seleccionado
+// Variable global para la instancia del gráfico
+let chart;
+
+// Función para actualizar los datos del gráfico según el período seleccionado
 function updateChartData(period) {
+    currentPeriod = period; // Actualizamos el período actual
     const transactions = filterTransactionsByPeriod(period);
 
     const income = transactions
@@ -124,7 +197,6 @@ function updateChartData(period) {
         }]
     };
 
-    // Si el gráfico ya existe, actualizamos los datos
     if (chart) {
         chart.data = chartData;
         chart.update();
@@ -144,9 +216,10 @@ function updateChartData(period) {
     }
 }
 
-// Cargar los datos iniciales del mes, tabla de transacciones y totales/balance al cargar la página
+// Función que se ejecuta al cargar la página
 window.onload = function () {
-    updateChartData('month');
-    renderTransactionTable();
-    updateTotalsAndBalance(); // Calcular totales y balance al cargar la página
+    updateUI(); // Inicializa la tabla, el gráfico y los totales al cargar la página
 };
+
+// Asignar el controlador para el envío del formulario (por defecto para agregar transacciones)
+document.getElementById('transactionForm').onsubmit = handleFormSubmit;
