@@ -31,7 +31,6 @@ function updateTransaction(index, updatedTransaction) {
     updateUI();
 }
 
-// Función para renderizar la tabla de transacciones con botones de acción
 function renderTransactionTable() {
     const transactions = getTransactions();
     const tableBody = document.getElementById('transactionTable').getElementsByTagName('tbody')[0];
@@ -45,21 +44,26 @@ function renderTransactionTable() {
         const titleCell = row.insertCell(0);
         const amountCell = row.insertCell(1);
         const typeCell = row.insertCell(2);
-        const dateCell = row.insertCell(3);
-        const timeCell = row.insertCell(4);
-        const actionCell = row.insertCell(5); // Celda para los botones de acción
+        const creditCardCell = row.insertCell(3); // Nueva celda para el tipo de tarjeta
+        const dateCell = row.insertCell(4);
+        const timeCell = row.insertCell(5);
+        const actionCell = row.insertCell(6); // Celda para los botones de acción
 
         const transactionDate = new Date(transaction.date);
 
         titleCell.textContent = transaction.title;
-        amountCell.textContent = transaction.amount;
+
+        // Formatear el monto como moneda con signo de dólar
+        amountCell.textContent = `${transaction.amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}`;
+
         typeCell.textContent = transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1);
+        creditCardCell.textContent = transaction.creditCard; // Mostrar el tipo de tarjeta en la tabla
         dateCell.textContent = transactionDate.toLocaleDateString();
         timeCell.textContent = transactionDate.toLocaleTimeString();
 
         // Crear botón de eliminar
         const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete';
+        deleteButton.textContent = 'Eliminar';
         deleteButton.classList.add('btn', 'btn-danger', 'btn-sm', 'me-2');
         deleteButton.onclick = function() {
             deleteTransaction(index);
@@ -67,7 +71,7 @@ function renderTransactionTable() {
 
         // Crear botón de actualizar
         const updateButton = document.createElement('button');
-        updateButton.textContent = 'Update';
+        updateButton.textContent = 'Actualizar';
         updateButton.classList.add('btn', 'btn-warning', 'btn-sm');
         updateButton.onclick = function() {
             populateUpdateForm(transaction, index);
@@ -84,6 +88,7 @@ function populateUpdateForm(transaction, index) {
     document.getElementById('title').value = transaction.title;
     document.getElementById('amount').value = transaction.amount;
     document.getElementById('type').value = transaction.type;
+    document.getElementById('creditCard').value = transaction.creditCard; // Cargar el valor de la tarjeta en el formulario
 
     // Cambiamos el comportamiento del formulario para que actualice en lugar de crear una nueva transacción
     document.getElementById('transactionForm').onsubmit = function(e) {
@@ -92,9 +97,10 @@ function populateUpdateForm(transaction, index) {
         const updatedTitle = document.getElementById('title').value;
         const updatedAmount = parseFloat(document.getElementById('amount').value);
         const updatedType = document.getElementById('type').value;
+        const updatedCreditCard = document.getElementById('creditCard').value; // Obtener el nuevo valor de la tarjeta
         const updatedDate = new Date().toISOString(); // Fecha y hora actualizadas
 
-        const updatedTransaction = { title: updatedTitle, amount: updatedAmount, type: updatedType, date: updatedDate };
+        const updatedTransaction = { title: updatedTitle, amount: updatedAmount, type: updatedType, creditCard: updatedCreditCard, date: updatedDate };
         updateTransaction(index, updatedTransaction);
 
         // Resetear el formulario y restaurar el comportamiento para agregar nuevas transacciones
@@ -110,15 +116,16 @@ function handleFormSubmit(e) {
     const title = document.getElementById('title').value;
     const amount = parseFloat(document.getElementById('amount').value);
     const type = document.getElementById('type').value;
+    const creditCard = document.getElementById('creditCard').value; // Obtener la tarjeta de crédito seleccionada
     const date = new Date().toISOString(); // Almacenar la fecha y hora en formato ISO
 
-    const transaction = { title, amount, type, date };
+    const transaction = { title, amount, type, creditCard, date }; // Incluir tarjeta en la transacción
     saveTransaction(transaction);
 
     // Actualizar la UI y resetear el formulario
     updateUI();
     document.getElementById('transactionForm').reset();
-    document.getElementById('type').value = 'income'; // Restablecer el tipo a 'income'
+    document.getElementById('type').value = 'income'; // Restablecer tipo a 'income'
 }
 
 // Función para actualizar la UI (tabla, gráfico y totales/balance)

@@ -28,6 +28,17 @@
                     <option value="expense">Expense</option>
                 </select>
             </div>
+
+            <div class="form-group mb-3">
+                <label for="creditCard">Tipo de Tarjeta</label>
+                <select id="creditCard" class="form-control">
+                    <option value="General">General</option> <!-- Valor por defecto -->
+                    <option value="Visa-La Fise">Visa - La Fise</option>
+                    <option value="Mastercard-Banpro">Mastercard - Banpro</option>
+                    <option value="American Express-BAC">American Express - BAC</option>
+                </select>
+            </div>
+            
             <button type="submit" class="btn btn-primary">Add Transaction</button>
         </form>
 
@@ -79,6 +90,7 @@
                     <th>Title</th>
                     <th>Amount</th>
                     <th>Type</th>
+                    <th>Tarjeta</th>
                     <th>Date</th>
                     <th>Time</th>
                     <th>Actions</th> <!-- Nueva columna para los botones -->
