@@ -8,11 +8,36 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <!-- Barra de Navegación -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Mi Aplicación Financiera</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Transacciones</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Resumen Financiero</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="plan_ahorro.html">Plan de Ahorro</a> <!-- Enlace a la página de Plan de Ahorro -->
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
     <div class="container mt-5">
         <h1 class="text-center">Personal Finance Tracker</h1>
         
         <form id="transactionForm" class="mb-3">
-            <!-- Campo para el título de la transacción -->
             <div class="mb-3">
                 <label for="title" class="form-label">Transaction Title</label>
                 <input type="text" id="title" class="form-control" required>
@@ -75,7 +100,6 @@
         </div>
 
         <div class="mb-3">
-            <!-- Actualizamos las llamadas a la función correcta -->
             <button class="btn btn-secondary" onclick="updateChartData('day')">Day</button>
             <button class="btn btn-secondary" onclick="updateChartData('week')">Week</button>
             <button class="btn btn-secondary" onclick="updateChartData('month')">Month</button>
@@ -93,7 +117,7 @@
                     <th>Tarjeta</th>
                     <th>Date</th>
                     <th>Time</th>
-                    <th>Actions</th> <!-- Nueva columna para los botones -->
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -103,5 +127,7 @@
     </div>
 
     <script src="main.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
