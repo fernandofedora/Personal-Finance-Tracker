@@ -1,6 +1,8 @@
 let savingGoal = 0;
 let totalSaved = 0;
 let contributions = []; // Almacena el historial de contribuciones
+let editingIndex = null; // Variable global para rastrear la contribución en edición
+let savingGoalName = ''; // Variable global para el nombre del plan de ahorro
 
 // Cargar el plan de ahorro desde localStorage cuando la página se cargue
 window.addEventListener('DOMContentLoaded', (event) => {
@@ -28,40 +30,48 @@ document.getElementById('planAhorroForm').addEventListener('submit', function(e)
     // Reiniciar barra de progreso y tabla
     updateProgressBar();
     renderContributionsTable();
+
+    // Resetear el botón "Añadir Contribución" a su estado original
+    document.getElementById('addContributionButton').innerText = 'Añadir Contribución';
+    document.getElementById('addContributionButton').onclick = function() { addContribution(); };
 });
 
 // Función para agregar una contribución
 function addContribution() {
-    const contributionAmount = parseFloat(document.getElementById('contributionAmount').value);
+    if (editingIndex === null) { // Asegurarse de que no esté en modo edición
+        const contributionAmount = parseFloat(document.getElementById('contributionAmount').value);
 
-    if (contributionAmount > 0) {
-        const now = new Date();
-        const contribution = {
-            amount: contributionAmount,
-            date: now.toLocaleDateString(),
-            time: now.toLocaleTimeString()
-        };
+        if (contributionAmount > 0) {
+            const now = new Date();
+            const contribution = {
+                amount: contributionAmount,
+                date: now.toLocaleDateString(),
+                time: now.toLocaleTimeString()
+            };
 
-        contributions.push(contribution);
-        totalSaved += contributionAmount;
+            contributions.push(contribution);
+            totalSaved += contributionAmount;
 
-        // Asegurarse que no exceda la meta de ahorro
-        if (totalSaved >= savingGoal) {
-            totalSaved = savingGoal;
-            showSuccessMessage();
+            // Asegurarse que no exceda la meta de ahorro
+            if (totalSaved >= savingGoal) {
+                totalSaved = savingGoal;
+                showSuccessMessage();
+            }
+
+            // Guardar la contribución actualizada en localStorage
+            saveSavingsPlan(null, savingGoal, totalSaved, contributions);
+
+            // Actualizar barra de progreso y tabla
+            updateProgressBar();
+            renderContributionsTable();
+
+            // Limpiar el campo de contribución
+            document.getElementById('contributionAmount').value = '';
+        } else {
+            alert('Por favor, ingresa una cantidad válida para contribuir.');
         }
-
-        // Guardar la contribución actualizada en localStorage
-        saveSavingsPlan(null, savingGoal, totalSaved, contributions);
-
-        // Actualizar barra de progreso y tabla
-        updateProgressBar();
-        renderContributionsTable();
-
-        // Limpiar el campo de contribución
-        document.getElementById('contributionAmount').value = '';
     } else {
-        alert('Por favor, ingresa una cantidad válida para contribuir.');
+        alert("Finalice la edición actual antes de agregar una nueva contribución.");
     }
 }
 
@@ -76,28 +86,78 @@ function deleteContribution(index) {
     renderContributionsTable();
 }
 
-// Función para actualizar una contribución
-function updateContribution(index) {
-    const newAmount = parseFloat(prompt('Ingrese la nueva cantidad para esta contribución:', contributions[index].amount));
+// Función para preparar la edición de una contribución
+function prepareUpdateContribution(index) {
+    editingIndex = index; // Establecer el índice de la contribución en edición
+    const contributionAmountInput = document.getElementById('contributionAmount');
+    contributionAmountInput.value = contributions[index].amount; // Asignar el valor actual al input
+    document.getElementById('addContributionButton').innerText = 'Actualizar'; // Cambiar el texto del botón
+    document.getElementById('addContributionButton').onclick = function() { updateContributionFromInput(); }; // Cambiar la función del botón
+}
 
-    if (newAmount > 0) {
-        totalSaved -= contributions[index].amount; // Restar la cantidad actual
-        totalSaved += newAmount; // Agregar la nueva cantidad
+// Función para actualizar una contribución desde el input
+function updateContributionFromInput() {
+    if (editingIndex!== null) {
+        const newAmount = parseFloat(document.getElementById('contributionAmount').value);
+        if (newAmount > 0) {
+            totalSaved -= contributions[editingIndex].amount; // Restar la cantidad actual
+            totalSaved += newAmount; // Agregar la nueva cantidad
+            contributions[editingIndex].amount = newAmount;
 
-        contributions[index].amount = newAmount;
+            // Asegurarse de que no exceda la meta
+            if (totalSaved >= savingGoal) {
+                totalSaved = savingGoal;
+                showSuccessMessage();
+            }
 
-        // Asegurarse de que no exceda la meta
-        if (totalSaved >= savingGoal) {
-            totalSaved = savingGoal;
-            showSuccessMessage();
+            // Guardar los cambios en localStorage y actualizar la interfaz
+            saveSavingsPlan(null, savingGoal, totalSaved, contributions);
+            updateProgressBar();
+            renderContributionsTable();
+
+            // Resetear el botón y el input
+            document.getElementById('addContributionButton').innerText = 'Añadir Contribución';
+            document.getElementById('addContributionButton').onclick = function() { addContribution(); };
+            document.getElementById('contributionAmount').value = '';
+            editingIndex = null;
+        } else {
+            alert('Por favor, ingrese una cantidad válida.');
         }
+    }
+}
 
-        // Guardar los cambios en localStorage y actualizar la interfaz
-        saveSavingsPlan(null, savingGoal, totalSaved, contributions);
-        updateProgressBar();
-        renderContributionsTable();
+// Función para preparar la actualización del plan de ahorro
+function prepareUpdatePlan() {
+    const planNameInput = document.getElementById('updateSavingName');
+    const planGoalInput = document.getElementById('updateSavingGoal');
+    
+    // Rellenar los inputs con los valores actuales
+    planNameInput.value = savingGoalName;
+    planGoalInput.value = savingGoal;
+    
+    // Mostrar el modal
+    const updatePlanModal = new bootstrap.Modal(document.getElementById('updatePlanModal'));
+    updatePlanModal.show();
+}
+
+// Función para actualizar el plan de ahorro
+function updatePlan() {
+    const newPlanName = document.getElementById('updateSavingName').value;
+    const newPlanGoal = parseFloat(document.getElementById('updateSavingGoal').value);
+
+    if (newPlanName && newPlanGoal > 0) {
+        // Actualizar el plan de ahorro en localStorage
+        saveSavingsPlan(newPlanName, newPlanGoal, totalSaved, contributions);
+
+        // Actualizar la interfaz
+        updatePlanDetails(newPlanName, newPlanGoal);
+        updateProgressBar(); // En caso de que la meta haya cambiado, actualizar la barra de progreso
+
+        // Ocultar el modal
+        const updatePlanModal = bootstrap.Modal.getInstance(document.getElementById('updatePlanModal'));
+        updatePlanModal.hide();
     } else {
-        alert('Por favor, ingrese una cantidad válida.');
+        alert('Por favor, ingrese un nombre de plan válido y una meta total mayor a cero.');
     }
 }
 
@@ -123,12 +183,18 @@ function showSuccessMessage() {
 // Función para guardar el plan de ahorro en localStorage
 function saveSavingsPlan(savingName, savingGoal, totalSaved, contributions) {
     const plan = {
-        name: savingName ? savingName : localStorage.getItem('savingName'),
-        goal: savingGoal,
-        saved: totalSaved,
-        contributions: contributions
+        name: savingName || savingGoalName, // Usa el nombre existente si no se pasa uno nuevo
+        goal: savingGoal !== undefined ? savingGoal : savingGoal, // Usa el objetivo existente si no se pasa uno nuevo
+        saved: totalSaved !== undefined ? totalSaved : totalSaved, // Usa el total guardado existente si no se pasa uno nuevo
+        contributions: contributions || contributions
     };
     localStorage.setItem('savingPlan', JSON.stringify(plan));
+
+    // Actualizar las variables globales
+    savingGoalName = plan.name;
+    savingGoal = plan.goal;
+    totalSaved = plan.saved;
+    contributions = plan.contributions;
 }
 
 // Función para cargar el plan de ahorro desde localStorage
@@ -140,8 +206,9 @@ function loadSavingsPlan() {
         savingGoal = plan.goal;
         totalSaved = plan.saved;
         contributions = plan.contributions;
+        savingGoalName = plan.name;
 
-        updatePlanDetails(plan.name, plan.goal);
+        updatePlanDetails(savingGoalName, savingGoal);
         updateProgressBar();
         renderContributionsTable();
 
@@ -158,7 +225,6 @@ function updatePlanDetails(savingName, savingGoal) {
     document.getElementById('planName').innerText = `Plan de Ahorro: ${savingName}`;
     document.getElementById('planGoalText').innerText = `Meta Total: $${savingGoal.toFixed(2)}`;
 }
-
 //Función para renderizar la tabla de contribuciones
 function renderContributionsTable() {
     const tableBody = document.getElementById('contributionTableBody');
@@ -175,7 +241,7 @@ function renderContributionsTable() {
             <td>${contribution.date}</td>
             <td>${contribution.time}</td>
             <td>
-                <button class="btn btn-warning btn-sm" onclick="updateContribution(${index})">Actualizar</button>
+                <button class="btn btn-warning btn-sm" onclick="prepareUpdateContribution(${index})">Actualizar</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteContribution(${index})">Eliminar</button>
             </td>
         `;
@@ -183,4 +249,3 @@ function renderContributionsTable() {
         tableBody.appendChild(row);
     });
 }
-
