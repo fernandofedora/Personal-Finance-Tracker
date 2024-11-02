@@ -13,6 +13,8 @@ function saveTransaction(transaction) {
     const transactions = getTransactions();
     transactions.push(transaction);
     saveTransactions(transactions);
+    updateUI();
+    //updateCardTotals(); 
 }
 
 // Función para eliminar una transacción
@@ -29,6 +31,8 @@ function updateTransaction(index, updatedTransaction) {
     transactions[index] = updatedTransaction; // Actualiza la transacción en el índice dado
     saveTransactions(transactions);
     updateUI();
+    updateCardTotals(); 
+
 }
 
 function renderTransactionTable() {
