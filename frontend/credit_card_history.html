@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Gastos por Tarjeta</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Barra de Navegación -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Mi Aplicación Financiera</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="credit_card_history.html">Historial de Tarjetas</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1 class="text-center">Totales de Gastos por Tarjeta de Crédito</h1>
+
+        <!-- Mostrar los totales de gastos -->
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <h5>Visa - La Fise:</h5>
+                <p id="totalVisaLaFise">$0.00</p>
+            </div>
+            <div class="col-md-3">
+                <h5>Mastercard - Banpro:</h5>
+                <p id="totalMastercardBanpro">$0.00</p>
+            </div>
+            <div class="col-md-3">
+                <h5>American Express - BAC:</h5>
+                <p id="totalAmexBAC">$0.00</p>
+            </div>
+            <div class="col-md-3">
+                <h5>General:</h5>
+                <p id="totalGeneral">$0.00</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="credit_card_history.js"></script>
+</body>
+</html>
