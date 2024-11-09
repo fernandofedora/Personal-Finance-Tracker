@@ -116,20 +116,22 @@ function populateUpdateForm(transaction, index) {
 // Función para manejar el envío del formulario (agregar transacción)
 function handleFormSubmit(e) {
     e.preventDefault();
-
     const title = document.getElementById('title').value;
     const amount = parseFloat(document.getElementById('amount').value);
     const type = document.getElementById('type').value;
-    const creditCard = document.getElementById('creditCard').value; // Obtener la tarjeta de crédito seleccionada
-    const date = new Date().toISOString(); // Almacenar la fecha y hora en formato ISO
+    const creditCard = document.getElementById('creditCard').value;
+    const date = new Date().toISOString();
 
-    const transaction = { title, amount, type, creditCard, date }; // Incluir tarjeta en la transacción
+    if (isNaN(amount)) {
+        alert('Por favor, ingrese un monto válido');
+        return;
+    }
+
+    const transaction = { title, amount, type, creditCard, date };
     saveTransaction(transaction);
-
-    // Actualizar la UI y resetear el formulario
     updateUI();
     document.getElementById('transactionForm').reset();
-    document.getElementById('type').value = 'income'; // Restablecer tipo a 'income'
+    document.getElementById('type').value = 'income';
 }
 
 // Función para actualizar la UI (tabla, gráfico y totales/balance)
