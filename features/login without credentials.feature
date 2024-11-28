@@ -1,18 +1,12 @@
-Feature: #Here the title is described
-  Here the feature is described
-  
-  #Here the scenario is described
-  Scenario: scenario title
-    Given preconditions
-    When actions
-    Then validations
-      
-  #Here the scenario is described
-  Scenario Outline: scenario title <field> <field2>
-    Given preconditions
-    When actions
-    Then validations
-    
-    Examples:
-      | field | field2 |
-      | data  | data2  |
+Feature: User login
+
+  As a user who wants to access the system
+  I want the system to show an error if I enter incorrect credentials
+  So that unauthorized access is prevented
+
+  Scenario: User attempts to log in with incorrect credentials
+    Given the user is on the login page
+    When the user enters "incorrect_user" as the username and "wrong_password" as the password
+    And clicks the "Login" button
+    Then the system should display an error message "Incorrect credentials"
+    And the user should not be redirected to the dashboard
